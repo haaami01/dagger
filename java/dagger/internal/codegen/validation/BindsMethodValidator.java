@@ -24,22 +24,20 @@ import static dagger.internal.codegen.validation.TypeHierarchyValidator.validate
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
-import dagger.Binds;
-import dagger.Module;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.producers.ProducerModule;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
-/** A validator for {@link Binds} methods. */
+/** A validator for {@link dagger.Binds} methods. */
 final class BindsMethodValidator extends BindingMethodValidator {
   private final DaggerTypes types;
   private final BindsTypeChecker bindsTypeChecker;
@@ -56,8 +54,8 @@ final class BindsMethodValidator extends BindingMethodValidator {
         elements,
         types,
         kotlinMetadataUtil,
-        Binds.class,
-        ImmutableSet.of(Module.class, ProducerModule.class),
+        TypeNames.BINDS,
+        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,

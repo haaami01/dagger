@@ -35,7 +35,6 @@ import com.squareup.javapoet.ClassName;
 import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import java.io.Writer;
-import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -167,9 +166,9 @@ public final class DaggerElements implements Elements, ClearableCache {
    * that of {@code annotationClasses}.
    */
   public static boolean isAnyAnnotationPresent(
-      Element element, Iterable<? extends Class<? extends Annotation>> annotationClasses) {
-    for (Class<? extends Annotation> annotation : annotationClasses) {
-      if (MoreElements.isAnnotationPresent(element, annotation)) {
+      Element element, Iterable<ClassName> annotationClasses) {
+    for (ClassName annotation : annotationClasses) {
+      if (isAnnotationPresent(element, annotation)) {
         return true;
       }
     }
@@ -178,9 +177,7 @@ public final class DaggerElements implements Elements, ClearableCache {
 
   @SafeVarargs
   public static boolean isAnyAnnotationPresent(
-      Element element,
-      Class<? extends Annotation> first,
-      Class<? extends Annotation>... otherAnnotations) {
+      Element element, ClassName first, ClassName... otherAnnotations) {
     return isAnyAnnotationPresent(element, asList(first, otherAnnotations));
   }
 
@@ -195,12 +192,23 @@ public final class DaggerElements implements Elements, ClearableCache {
   }
 
   /**
+   * Returns {@code true} iff the given element has an {@link AnnotationMirror} whose {@link
+   * AnnotationMirror#getAnnotationType() annotation type} has the same canonical name as that of
+   * {@code annotationClass}. This method is a safer alternative to calling {@link
+   * Element#getAnnotation} and checking for {@code null} as it avoids any interaction with
+   * annotation proxies.
+   */
+  public static boolean isAnnotationPresent(Element element, ClassName annotationName) {
+    return getAnnotationMirror(element, annotationName).isPresent();
+  }
+
+  /**
    * Returns the annotation present on {@code element} whose type is {@code first} or within {@code
    * rest}, checking each annotation type in order.
    */
   @SafeVarargs
   public static Optional<AnnotationMirror> getAnyAnnotation(
-      Element element, Class<? extends Annotation> first, Class<? extends Annotation>... rest) {
+      Element element, ClassName first, ClassName... rest) {
     return getAnyAnnotation(element, asList(first, rest));
   }
 
@@ -209,7 +217,7 @@ public final class DaggerElements implements Elements, ClearableCache {
    * checking each annotation type in order.
    */
   public static Optional<AnnotationMirror> getAnyAnnotation(
-      Element element, Collection<? extends Class<? extends Annotation>> annotations) {
+      Element element, Collection<ClassName> annotations) {
     return element.getAnnotationMirrors().stream()
         .filter(hasAnnotationTypeIn(annotations))
         .map((AnnotationMirror a) -> a) // Avoid returning Optional<? extends AnnotationMirror>.
@@ -219,12 +227,14 @@ public final class DaggerElements implements Elements, ClearableCache {
   /** Returns the annotations present on {@code element} of all types. */
   @SafeVarargs
   public static ImmutableSet<AnnotationMirror> getAllAnnotations(
-      Element element, Class<? extends Annotation> first, Class<? extends Annotation>... rest) {
+      Element element, ClassName first, ClassName... rest) {
     return ImmutableSet.copyOf(
         Iterables.filter(
             element.getAnnotationMirrors(), hasAnnotationTypeIn(asList(first, rest))::test));
   }
 
+  // Note: This is similar to auto-common's MoreElements except using ClassName rather than Class.
+  // TODO(bcorso): Contribute a String version to auto-common's MoreElements?
   /**
    * Returns an {@link AnnotationMirror} for the annotation of type {@code annotationClass} on
    * {@code element}, or {@link Optional#empty()} if no such annotation exists. This method is a
@@ -232,14 +242,22 @@ public final class DaggerElements implements Elements, ClearableCache {
    * annotation proxies.
    */
   public static Optional<AnnotationMirror> getAnnotationMirror(
-      Element element, Class<? extends Annotation> annotationClass) {
-    return Optional.ofNullable(MoreElements.getAnnotationMirror(element, annotationClass).orNull());
+      Element element, ClassName annotationName) {
+    String annotationClassName = annotationName.canonicalName();
+    for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
+      TypeElement annotationTypeElement =
+          MoreElements.asType(annotationMirror.getAnnotationType().asElement());
+      if (annotationTypeElement.getQualifiedName().contentEquals(annotationClassName)) {
+        return Optional.of(annotationMirror);
+      }
+    }
+    return Optional.empty();
   }
 
   private static Predicate<AnnotationMirror> hasAnnotationTypeIn(
-      Collection<? extends Class<? extends Annotation>> annotations) {
+      Collection<ClassName> annotations) {
     Set<String> annotationClassNames =
-        annotations.stream().map(Class::getCanonicalName).collect(toSet());
+        annotations.stream().map(ClassName::canonicalName).collect(toSet());
     return annotation ->
         annotationClassNames.contains(
             MoreTypes.asTypeElement(annotation.getAnnotationType()).getQualifiedName().toString());

@@ -24,6 +24,7 @@ import static java.util.Collections.disjoint;
 
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.SourceFileGenerator;
 import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.binding.ComponentDescriptor;
@@ -32,7 +33,6 @@ import dagger.internal.codegen.validation.ComponentCreatorValidator;
 import dagger.internal.codegen.validation.ComponentValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import java.lang.annotation.Annotation;
 import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
@@ -74,7 +74,7 @@ final class ComponentHjarProcessingStep extends TypeCheckingProcessingStep<TypeE
   }
 
   @Override
-  public Set<Class<? extends Annotation>> annotations() {
+  public Set<ClassName> annotationClassNames() {
     return union(rootComponentAnnotations(), rootComponentCreatorAnnotations());
   }
 
@@ -83,8 +83,7 @@ final class ComponentHjarProcessingStep extends TypeCheckingProcessingStep<TypeE
   // clause for any exception that's not TypeNotPresentException and ignore the component entirely
   // in that case.
   @Override
-  protected void process(
-      TypeElement element, ImmutableSet<Class<? extends Annotation>> annotations) {
+  protected void process(TypeElement element, ImmutableSet<ClassName> annotations) {
     if (!disjoint(annotations, rootComponentAnnotations())) {
       processRootComponent(element);
     }

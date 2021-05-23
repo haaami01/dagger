@@ -24,11 +24,11 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.FormatMethod;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectionAnnotations;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import java.lang.annotation.Annotation;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -42,8 +42,8 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
   private final DaggerTypes types;
   private final KotlinMetadataUtil metadataUtil;
   private final DependencyRequestValidator dependencyRequestValidator;
-  private final Class<? extends Annotation> methodAnnotation;
-  private final ImmutableSet<? extends Class<? extends Annotation>> enclosingElementAnnotations;
+  private final ClassName methodAnnotation;
+  private final ImmutableSet<ClassName> enclosingElementAnnotations;
   private final Abstractness abstractness;
   private final ExceptionSuperclass exceptionSuperclass;
 
@@ -59,8 +59,8 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
       DaggerTypes types,
       KotlinMetadataUtil metadataUtil,
       DependencyRequestValidator dependencyRequestValidator,
-      Class<? extends Annotation> methodAnnotation,
-      Class<? extends Annotation> enclosingElementAnnotation,
+      ClassName methodAnnotation,
+      ClassName enclosingElementAnnotation,
       Abstractness abstractness,
       ExceptionSuperclass exceptionSuperclass,
       AllowsMultibindings allowsMultibindings,
@@ -91,8 +91,8 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
       DaggerElements elements,
       DaggerTypes types,
       KotlinMetadataUtil metadataUtil,
-      Class<? extends Annotation> methodAnnotation,
-      Iterable<? extends Class<? extends Annotation>> enclosingElementAnnotations,
+      ClassName methodAnnotation,
+      Iterable<ClassName> enclosingElementAnnotations,
       DependencyRequestValidator dependencyRequestValidator,
       Abstractness abstractness,
       ExceptionSuperclass exceptionSuperclass,
@@ -111,7 +111,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
   }
 
   /** The annotation that identifies binding methods validated by this object. */
-  final Class<? extends Annotation> methodAnnotation() {
+  final ClassName methodAnnotation() {
     return methodAnnotation;
   }
 
@@ -127,7 +127,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
 
   @Override
   protected final String bindingElements() {
-    return String.format("@%s methods", methodAnnotation.getSimpleName());
+    return String.format("@%s methods", methodAnnotation.simpleName());
   }
 
   @Override
@@ -175,7 +175,7 @@ abstract class BindingMethodValidator extends BindingElementValidator<Executable
             bindingMethods(
                 "can only be present within a @%s",
                 enclosingElementAnnotations.stream()
-                    .map(Class::getSimpleName)
+                    .map(ClassName::simpleName)
                     .collect(joining(" or @"))));
       }
     }

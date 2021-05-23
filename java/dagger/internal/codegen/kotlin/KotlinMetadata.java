@@ -34,6 +34,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.extension.DaggerCollectors;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import java.util.HashMap;
@@ -188,7 +189,7 @@ abstract class KotlinMetadata {
 
   private static KotlinClassMetadata.Class metadataOf(TypeElement typeElement) {
     Optional<AnnotationMirror> metadataAnnotation =
-        getAnnotationMirror(typeElement, Metadata.class);
+        getAnnotationMirror(typeElement, ClassName.get(Metadata.class));
     Preconditions.checkState(metadataAnnotation.isPresent());
     KotlinClassHeader header =
         new KotlinClassHeader(

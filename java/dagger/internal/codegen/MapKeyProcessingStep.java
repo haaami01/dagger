@@ -22,15 +22,15 @@ import static javax.lang.model.element.ElementKind.ANNOTATION_TYPE;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.ClassName;
 import dagger.MapKey;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.MapKeyValidator;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
 import dagger.internal.codegen.writing.AnnotationCreatorGenerator;
 import dagger.internal.codegen.writing.UnwrappedMapKeyGenerator;
-import java.lang.annotation.Annotation;
-import java.util.Set;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -65,13 +65,12 @@ final class MapKeyProcessingStep extends TypeCheckingProcessingStep<TypeElement>
   }
 
   @Override
-  public Set<Class<? extends Annotation>> annotations() {
-    return ImmutableSet.<Class<? extends Annotation>>of(MapKey.class);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.MAP_KEY);
   }
 
   @Override
-  protected void process(
-      TypeElement mapKeyAnnotationType, ImmutableSet<Class<? extends Annotation>> annotations) {
+  protected void process(TypeElement mapKeyAnnotationType, ImmutableSet<ClassName> annotations) {
     ValidationReport<Element> mapKeyReport = mapKeyValidator.validate(mapKeyAnnotationType);
     mapKeyReport.printMessagesTo(messager);
 

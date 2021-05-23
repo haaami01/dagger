@@ -44,7 +44,6 @@ import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Scope;
 import dagger.producers.CancellationPolicy;
-import dagger.producers.ProductionComponent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -99,7 +98,7 @@ public abstract class ComponentDescriptor {
 
   /**
    * The set of component dependencies listed in {@link Component#dependencies} or {@link
-   * ProductionComponent#dependencies()}.
+   * dagger.producers.ProductionComponent#dependencies()}.
    */
   public abstract ImmutableSet<ComponentRequirement> dependencies();
 

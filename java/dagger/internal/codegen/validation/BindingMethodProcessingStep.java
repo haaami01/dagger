@@ -20,8 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
-import java.lang.annotation.Annotation;
-import java.util.Set;
+import com.squareup.javapoet.ClassName;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -42,13 +41,12 @@ public final class BindingMethodProcessingStep
   }
 
   @Override
-  public Set<? extends Class<? extends Annotation>> annotations() {
+  public ImmutableSet<ClassName> annotationClassNames() {
     return anyBindingMethodValidator.methodAnnotations();
   }
 
   @Override
-  protected void process(
-      ExecutableElement method, ImmutableSet<Class<? extends Annotation>> annotations) {
+  protected void process(ExecutableElement method, ImmutableSet<ClassName> annotations) {
     checkArgument(
         anyBindingMethodValidator.isBindingMethod(method),
         "%s is not annotated with any of %s",

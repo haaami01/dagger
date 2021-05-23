@@ -63,11 +63,11 @@ import dagger.internal.codegen.binding.ComponentRequirement;
 import dagger.internal.codegen.binding.KeyVariableNamer;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.javapoet.CodeBlocks;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.javapoet.TypeSpecs;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.model.Key;
 import dagger.model.RequestKind;
-import dagger.producers.internal.CancellationListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -631,7 +631,8 @@ public final class ComponentImplementation {
         addConstructorAndInitializationMethods();
 
         if (graph.componentDescriptor().isProduction()) {
-          TypeSpecs.addSupertype(builder, elements.getTypeElement(CancellationListener.class));
+          TypeSpecs.addSupertype(
+              builder, elements.getTypeElement(TypeNames.CANCELLATION_LISTENER.canonicalName()));
           addCancellationListenerImplementation();
         }
       }

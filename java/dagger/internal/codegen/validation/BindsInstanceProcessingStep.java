@@ -18,9 +18,8 @@ package dagger.internal.codegen.validation;
 
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
-import dagger.BindsInstance;
-import java.lang.annotation.Annotation;
-import java.util.Set;
+import com.squareup.javapoet.ClassName;
+import dagger.internal.codegen.javapoet.TypeNames;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -46,12 +45,12 @@ public final class BindsInstanceProcessingStep extends TypeCheckingProcessingSte
   }
 
   @Override
-  public Set<? extends Class<? extends Annotation>> annotations() {
-    return ImmutableSet.of(BindsInstance.class);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.BINDS_INSTANCE);
   }
 
   @Override
-  protected void process(Element element, ImmutableSet<Class<? extends Annotation>> annotations) {
+  protected void process(Element element, ImmutableSet<ClassName> annotations) {
     switch (element.getKind()) {
       case PARAMETER:
         parameterValidator.validate(MoreElements.asVariable(element)).printMessagesTo(messager);

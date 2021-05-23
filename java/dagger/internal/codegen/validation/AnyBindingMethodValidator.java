@@ -16,17 +16,17 @@
 
 package dagger.internal.codegen.validation;
 
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.Util.reentrantComputeIfAbsent;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static dagger.internal.codegen.langmodel.DaggerElements.isAnyAnnotationPresent;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ClearableCache;
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -36,13 +36,12 @@ import javax.lang.model.element.ExecutableElement;
 /** Validates any binding method. */
 @Singleton
 public final class AnyBindingMethodValidator implements ClearableCache {
-  private final ImmutableMap<Class<? extends Annotation>, BindingMethodValidator> validators;
+  private final ImmutableMap<ClassName, BindingMethodValidator> validators;
   private final Map<ExecutableElement, ValidationReport<ExecutableElement>> reports =
       new HashMap<>();
 
   @Inject
-  AnyBindingMethodValidator(
-      ImmutableMap<Class<? extends Annotation>, BindingMethodValidator> validators) {
+  AnyBindingMethodValidator(ImmutableMap<ClassName, BindingMethodValidator> validators) {
     this.validators = validators;
   }
 
@@ -52,7 +51,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
   }
 
   /** Returns the binding method annotations considered by this validator. */
-  ImmutableSet<Class<? extends Annotation>> methodAnnotations() {
+  ImmutableSet<ClassName> methodAnnotations() {
     return validators.keySet();
   }
 
@@ -91,9 +90,8 @@ public final class AnyBindingMethodValidator implements ClearableCache {
 
   private ValidationReport<ExecutableElement> validateUncached(ExecutableElement method) {
     ValidationReport.Builder<ExecutableElement> report = ValidationReport.about(method);
-    ImmutableSet<? extends Class<? extends Annotation>> bindingMethodAnnotations =
-        methodAnnotations()
-            .stream()
+    ImmutableSet<ClassName> bindingMethodAnnotations =
+        methodAnnotations().stream()
             .filter(annotation -> isAnnotationPresent(method, annotation))
             .collect(toImmutableSet());
     switch (bindingMethodAnnotations.size()) {
@@ -111,7 +109,7 @@ public final class AnyBindingMethodValidator implements ClearableCache {
             String.format(
                 "%s is annotated with more than one of (%s)",
                 method.getSimpleName(),
-                methodAnnotations().stream().map(Class::getCanonicalName).collect(joining(", "))),
+                methodAnnotations().stream().map(ClassName::canonicalName).collect(joining(", "))),
             method);
         break;
     }

@@ -24,23 +24,21 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Exceptio
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.ImmutableSet;
-import dagger.Module;
 import dagger.internal.codegen.base.MapType;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.multibindings.Multibinds;
-import dagger.producers.ProducerModule;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 
-/** A validator for {@link Multibinds} methods. */
+/** A validator for {@link dagger.multibindings.Multibinds} methods. */
 class MultibindsMethodValidator extends BindingMethodValidator {
 
-  /** Creates a validator for {@link Multibinds @Multibinds} methods. */
+  /** Creates a validator for {@link dagger.multibindings.Multibinds @Multibinds} methods. */
   @Inject
   MultibindsMethodValidator(
       DaggerElements elements,
@@ -52,8 +50,8 @@ class MultibindsMethodValidator extends BindingMethodValidator {
         elements,
         types,
         kotlinMetadataUtil,
-        Multibinds.class,
-        ImmutableSet.of(Module.class, ProducerModule.class),
+        TypeNames.MULTIBINDS,
+        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,

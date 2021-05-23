@@ -43,6 +43,7 @@ import com.squareup.javapoet.TypeName;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingKind;
@@ -231,7 +232,7 @@ public final class AssistedInjectionAnnotations {
     public static AssistedParameter create(VariableElement parameter, TypeMirror parameterType) {
       AssistedParameter assistedParameter =
           new AutoValue_AssistedInjectionAnnotations_AssistedParameter(
-              getAnnotationMirror(parameter, Assisted.class)
+              getAnnotationMirror(parameter, TypeNames.ASSISTED)
                   .map(assisted -> getStringValue(assisted, "value"))
                   .orElse(""),
               MoreTypes.equivalence().wrap(parameterType));

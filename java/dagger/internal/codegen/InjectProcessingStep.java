@@ -19,10 +19,10 @@ package dagger.internal.codegen;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import dagger.assisted.AssistedInject;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.InjectBindingRegistry;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
-import java.lang.annotation.Annotation;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -69,13 +69,12 @@ final class InjectProcessingStep extends TypeCheckingProcessingStep<Element> {
   }
 
   @Override
-  public Set<Class<? extends Annotation>> annotations() {
-    return ImmutableSet.of(Inject.class, AssistedInject.class);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.INJECT, TypeNames.ASSISTED_INJECT);
   }
 
   @Override
-  protected void process(
-      Element injectElement, ImmutableSet<Class<? extends Annotation>> annotations) {
+  protected void process(Element injectElement, ImmutableSet<ClassName> annotations) {
     // Only process an element once to avoid getting duplicate errors when an element is annotated
     // with multiple inject annotations.
     if (processedElements.contains(injectElement)) {

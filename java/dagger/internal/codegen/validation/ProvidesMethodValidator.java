@@ -22,18 +22,16 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Abstract
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.RUNTIME_EXCEPTION;
 
 import com.google.common.collect.ImmutableSet;
-import dagger.Module;
-import dagger.Provides;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.producers.ProducerModule;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 
-/** A validator for {@link Provides} methods. */
+/** A validator for {@link dagger.Provides} methods. */
 final class ProvidesMethodValidator extends BindingMethodValidator {
 
   private final DependencyRequestValidator dependencyRequestValidator;
@@ -49,8 +47,8 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
         elements,
         types,
         kotlinMetadataUtil,
-        Provides.class,
-        ImmutableSet.of(Module.class, ProducerModule.class),
+        TypeNames.PROVIDES,
+        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
         MUST_BE_CONCRETE,
         RUNTIME_EXCEPTION,
@@ -74,7 +72,7 @@ final class ProvidesMethodValidator extends BindingMethodValidator {
     protected void checkAdditionalMethodProperties() {
     }
 
-    /** Adds an error if a {@link Provides @Provides} method depends on a producer type. */
+    /** Adds an error if a {@link dagger.Provides @Provides} method depends on a producer type. */
     @Override
     protected void checkParameter(VariableElement parameter) {
       super.checkParameter(parameter);

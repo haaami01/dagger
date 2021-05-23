@@ -17,12 +17,17 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.difference;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 
-import com.google.auto.common.BasicAnnotationProcessor.ProcessingStep;
+import com.google.auto.common.BasicAnnotationProcessor.Step;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.SetMultimap;
-import java.lang.annotation.Annotation;
+import com.squareup.javapoet.ClassName;
+import java.util.Set;
 import java.util.function.Function;
 import javax.lang.model.element.Element;
 
@@ -31,7 +36,7 @@ import javax.lang.model.element.Element;
  * TypeNotPresentException} is thrown.
  */
 // TODO(dpb): Contribute to auto-common.
-public abstract class TypeCheckingProcessingStep<E extends Element> implements ProcessingStep {
+public abstract class TypeCheckingProcessingStep<E extends Element> implements Step {
   private final Function<Element, E> downcaster;
 
   protected TypeCheckingProcessingStep(Function<Element, E> downcaster) {
@@ -39,8 +44,21 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements P
   }
 
   @Override
-  public ImmutableSet<Element> process(
-      SetMultimap<Class<? extends Annotation>, Element> elementsByAnnotation) {
+  public final ImmutableSet<String> annotations() {
+    return annotationClassNames().stream().map(ClassName::canonicalName).collect(toImmutableSet());
+  }
+
+  @Override
+  public ImmutableSet<Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+    ImmutableMap<String, ClassName> annotationClassNames =
+        annotationClassNames().stream()
+            .collect(toImmutableMap(ClassName::canonicalName, className -> className));
+    checkState(
+        annotationClassNames.keySet().containsAll(elementsByAnnotation.keySet()),
+        "Unexpected annotations for %s: %s",
+        this.getClass().getName(),
+        difference(elementsByAnnotation.keySet(), annotationClassNames.keySet()));
+
     ImmutableSet.Builder<Element> deferredElements = ImmutableSet.builder();
     ImmutableSetMultimap.copyOf(elementsByAnnotation)
         .inverse()
@@ -48,7 +66,9 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements P
         .forEach(
             (element, annotations) -> {
               try {
-                process(downcaster.apply(element), ImmutableSet.copyOf(annotations));
+                process(
+                    downcaster.apply(element),
+                    annotations.stream().map(annotationClassNames::get).collect(toImmutableSet()));
               } catch (TypeNotPresentException e) {
                 deferredElements.add(element);
               }
@@ -60,8 +80,10 @@ public abstract class TypeCheckingProcessingStep<E extends Element> implements P
    * Processes one element. If this method throws {@link TypeNotPresentException}, the element will
    * be deferred until the next round of processing.
    *
-   * @param annotations the subset of {@link ProcessingStep#annotations()} that annotate {@code
-   *     element}
+   * @param annotations the subset of {@link Step#annotations()} that annotate {@code element}
    */
-  protected abstract void process(E element, ImmutableSet<Class<? extends Annotation>> annotations);
+  protected abstract void process(E element, ImmutableSet<ClassName> annotations);
+
+  /** Returns the set of annotations processed by this {@link Step}. */
+  protected abstract Set<ClassName> annotationClassNames();
 }

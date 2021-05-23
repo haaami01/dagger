@@ -73,7 +73,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   @Inject InjectBindingRegistry injectBindingRegistry;
   @Inject SourceFileGenerator<ProvisionBinding> factoryGenerator;
   @Inject SourceFileGenerator<MembersInjectionBinding> membersInjectorGenerator;
-  @Inject ImmutableList<ProcessingStep> processingSteps;
+  @Inject ImmutableList<Step> processingSteps;
   @Inject BindingGraphPlugins bindingGraphPlugins;
   @Inject Set<ClearableCache> clearableCaches;
 
@@ -117,7 +117,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   }
 
   @Override
-  protected Iterable<? extends ProcessingStep> initSteps() {
+  protected Iterable<? extends Step> steps() {
     ProcessorComponent.factory().create(processingEnv, testingPlugins).inject(this);
 
     bindingGraphPlugins.initializePlugins();
@@ -157,7 +157,7 @@ public class ComponentProcessor extends BasicAnnotationProcessor {
   @Module
   interface ProcessingStepsModule {
     @Provides
-    static ImmutableList<ProcessingStep> processingSteps(
+    static ImmutableList<Step> processingSteps(
         MapKeyProcessingStep mapKeyProcessingStep,
         InjectProcessingStep injectProcessingStep,
         AssistedInjectProcessingStep assistedInjectProcessingStep,

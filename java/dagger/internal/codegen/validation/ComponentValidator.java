@@ -17,7 +17,6 @@
 package dagger.internal.codegen.validation;
 
 import static com.google.auto.common.MoreElements.asType;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asDeclared;
 import static com.google.auto.common.MoreTypes.asExecutable;
 import static com.google.auto.common.MoreTypes.asTypeElement;
@@ -40,6 +39,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableList;
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnnotationMirror;
 import static dagger.internal.codegen.langmodel.DaggerElements.getAnyAnnotation;
+import static dagger.internal.codegen.langmodel.DaggerElements.isAnnotationPresent;
 import static java.util.Comparator.comparing;
 import static javax.lang.model.element.ElementKind.CLASS;
 import static javax.lang.model.element.ElementKind.INTERFACE;
@@ -55,8 +55,8 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
+import com.squareup.javapoet.ClassName;
 import dagger.Component;
-import dagger.Reusable;
 import dagger.internal.codegen.base.ClearableCache;
 import dagger.internal.codegen.base.ComponentAnnotation;
 import dagger.internal.codegen.binding.ComponentKind;
@@ -64,13 +64,12 @@ import dagger.internal.codegen.binding.DependencyRequestFactory;
 import dagger.internal.codegen.binding.ErrorMessages;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.DependencyRequest;
 import dagger.model.Key;
-import dagger.producers.CancellationPolicy;
 import dagger.producers.ProductionComponent;
-import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -196,7 +195,7 @@ public final class ComponentValidator implements ClearableCache {
     }
 
     private void validateUseOfCancellationPolicy() {
-      if (isAnnotationPresent(component, CancellationPolicy.class)
+      if (isAnnotationPresent(component, TypeNames.CANCELLATION_POLICY)
           && !componentKind().isProducer()) {
         report.addError(
             "@CancellationPolicy may only be applied to production components and subcomponents",
@@ -210,7 +209,7 @@ public final class ComponentValidator implements ClearableCache {
         report.addError(
             String.format(
                 "@%s may only be applied to an interface or abstract class",
-                componentKind().annotation().getSimpleName()),
+                componentKind().annotation().simpleName()),
             component);
       }
     }
@@ -232,7 +231,7 @@ public final class ComponentValidator implements ClearableCache {
 
     private void validateNoReusableAnnotation() {
       Optional<AnnotationMirror> reusableAnnotation =
-          getAnnotationMirror(component, Reusable.class);
+          getAnnotationMirror(component, TypeNames.REUSABLE);
       if (reusableAnnotation.isPresent()) {
         report.addError(
             "@Reusable cannot be applied to components or subcomponents",
@@ -543,7 +542,7 @@ public final class ComponentValidator implements ClearableCache {
       };
 
   private static Optional<AnnotationMirror> checkForAnnotations(
-      TypeMirror type, final Set<? extends Class<? extends Annotation>> annotations) {
+      TypeMirror type, final Set<ClassName> annotations) {
     return type.accept(
         new SimpleTypeVisitor8<Optional<AnnotationMirror>, Void>(Optional.empty()) {
           @Override

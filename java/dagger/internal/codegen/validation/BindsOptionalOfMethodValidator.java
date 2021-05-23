@@ -25,18 +25,16 @@ import static dagger.internal.codegen.validation.BindingMethodValidator.Abstract
 import static dagger.internal.codegen.validation.BindingMethodValidator.ExceptionSuperclass.NO_EXCEPTIONS;
 
 import com.google.common.collect.ImmutableSet;
-import dagger.BindsOptionalOf;
-import dagger.Module;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
-import dagger.producers.ProducerModule;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 
-/** A validator for {@link BindsOptionalOf} methods. */
+/** A validator for {@link dagger.BindsOptionalOf} methods. */
 final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
 
   private final DaggerTypes types;
@@ -53,8 +51,8 @@ final class BindsOptionalOfMethodValidator extends BindingMethodValidator {
         elements,
         types,
         kotlinMetadataUtil,
-        BindsOptionalOf.class,
-        ImmutableSet.of(Module.class, ProducerModule.class),
+        TypeNames.BINDS_OPTIONAL_OF,
+        ImmutableSet.of(TypeNames.MODULE, TypeNames.PRODUCER_MODULE),
         dependencyRequestValidator,
         MUST_BE_ABSTRACT,
         NO_EXCEPTIONS,

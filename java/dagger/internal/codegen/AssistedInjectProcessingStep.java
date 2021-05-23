@@ -23,13 +23,13 @@ import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingT
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import dagger.assisted.AssistedInject;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations.AssistedParameter;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.Messager;
@@ -51,14 +51,13 @@ final class AssistedInjectProcessingStep extends TypeCheckingProcessingStep<Exec
   }
 
   @Override
-  public ImmutableSet<Class<? extends Annotation>> annotations() {
-    return ImmutableSet.of(AssistedInject.class);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.ASSISTED_INJECT);
   }
 
   @Override
   protected void process(
-      ExecutableElement assistedInjectElement,
-      ImmutableSet<Class<? extends Annotation>> annotations) {
+      ExecutableElement assistedInjectElement, ImmutableSet<ClassName> annotations) {
     new AssistedInjectValidator().validate(assistedInjectElement).printMessagesTo(messager);
   }
 

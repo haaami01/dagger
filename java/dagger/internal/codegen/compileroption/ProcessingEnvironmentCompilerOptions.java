@@ -186,8 +186,7 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
           "dagger.internal.codegen".contentEquals(
               MoreElements.getPackage(component).getQualifiedName()),
           "Cannot set %s. It is only meant for internal testing.", KEYS_PER_COMPONENT_SHARD);
-      return Integer.parseInt(
-          processingEnvironment.getOptions().get(KEYS_PER_COMPONENT_SHARD));
+      return Integer.parseInt(processingEnvironment.getOptions().get(KEYS_PER_COMPONENT_SHARD));
     }
     return super.keysPerComponentShard(component);
   }

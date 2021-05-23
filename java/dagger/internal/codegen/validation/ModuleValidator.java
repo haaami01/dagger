@@ -54,21 +54,18 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.FormatMethod;
-import dagger.Module;
-import dagger.Subcomponent;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ModuleAnnotation;
 import dagger.internal.codegen.binding.BindingGraphFactory;
 import dagger.internal.codegen.binding.ComponentCreatorAnnotation;
 import dagger.internal.codegen.binding.ComponentDescriptorFactory;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.binding.ModuleKind;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.langmodel.DaggerTypes;
 import dagger.model.BindingGraph;
-import dagger.producers.ProducerModule;
-import dagger.producers.ProductionSubcomponent;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -93,17 +90,20 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 
-/** A {@linkplain ValidationReport validator} for {@link Module}s or {@link ProducerModule}s. */
+/**
+ * A {@linkplain ValidationReport validator} for {@link dagger.Module}s or {@link
+ * dagger.producers.ProducerModule}s.
+ */
 @Singleton
 public final class ModuleValidator {
-  private static final ImmutableSet<Class<? extends Annotation>> SUBCOMPONENT_TYPES =
-      ImmutableSet.of(Subcomponent.class, ProductionSubcomponent.class);
-  private static final ImmutableSet<Class<? extends Annotation>> SUBCOMPONENT_CREATOR_TYPES =
+  private static final ImmutableSet<ClassName> SUBCOMPONENT_TYPES =
+      ImmutableSet.of(TypeNames.SUBCOMPONENT, TypeNames.PRODUCTION_SUBCOMPONENT);
+  private static final ImmutableSet<ClassName> SUBCOMPONENT_CREATOR_TYPES =
       ImmutableSet.of(
-          Subcomponent.Builder.class,
-          Subcomponent.Factory.class,
-          ProductionSubcomponent.Builder.class,
-          ProductionSubcomponent.Factory.class);
+          TypeNames.SUBCOMPONENT_BUILDER,
+          TypeNames.SUBCOMPONENT_FACTORY,
+          TypeNames.PRODUCTION_SUBCOMPONENT_BUILDER,
+          TypeNames.PRODUCTION_SUBCOMPONENT_FACTORY);
   private static final Optional<Class<?>> ANDROID_PROCESSOR;
   private static final String CONTRIBUTES_ANDROID_INJECTOR_NAME =
       "dagger.android.ContributesAndroidInjector";
@@ -219,7 +219,7 @@ public final class ModuleValidator {
       builder.addError(
           String.format(
               "A @%s may not contain both non-static and abstract binding methods",
-              moduleKind.annotation().getSimpleName()));
+              moduleKind.annotation().simpleName()));
     }
 
     validateModuleVisibility(module, moduleKind, builder);
@@ -413,7 +413,7 @@ public final class ModuleValidator {
       ImmutableSet<ModuleKind> validModuleKinds,
       Set<TypeElement> visitedModules) {
     ValidationReport.Builder<TypeElement> subreport = ValidationReport.about(annotatedType);
-    ImmutableSet<? extends Class<? extends Annotation>> validModuleAnnotations =
+    ImmutableSet<ClassName> validModuleAnnotations =
         validModuleKinds.stream().map(ModuleKind::annotation).collect(toImmutableSet());
 
     for (AnnotationValue includedModule : getModules(annotation)) {
@@ -440,7 +440,7 @@ public final class ModuleValidator {
                         module.getQualifiedName(),
                         (validModuleAnnotations.size() > 1 ? "one of " : "")
                             + validModuleAnnotations.stream()
-                                .map(otherClass -> "@" + otherClass.getSimpleName())
+                                .map(otherClass -> "@" + otherClass.simpleName())
                                 .collect(joining(", ")));
                   } else if (knownModules.contains(module)
                       && !validate(module, visitedModules).isClean()) {
@@ -613,7 +613,7 @@ public final class ModuleValidator {
       report.addError(
           String.format(
               "@%ss cannot be scoped. Did you mean to scope a method instead?",
-              moduleKind.annotation().getSimpleName()),
+              moduleKind.annotation().simpleName()),
           module,
           scope);
     }

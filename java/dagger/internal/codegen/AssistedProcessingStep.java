@@ -21,15 +21,15 @@ import static dagger.internal.codegen.langmodel.DaggerElements.closestEnclosingT
 
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
-import dagger.assisted.Assisted;
+import com.squareup.javapoet.ClassName;
 import dagger.assisted.AssistedInject;
 import dagger.internal.codegen.binding.AssistedInjectionAnnotations;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.kotlin.KotlinMetadataUtil;
 import dagger.internal.codegen.langmodel.DaggerElements;
 import dagger.internal.codegen.validation.TypeCheckingProcessingStep;
 import dagger.internal.codegen.validation.ValidationReport;
-import java.lang.annotation.Annotation;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -62,13 +62,12 @@ final class AssistedProcessingStep extends TypeCheckingProcessingStep<VariableEl
   }
 
   @Override
-  public ImmutableSet<Class<? extends Annotation>> annotations() {
-    return ImmutableSet.of(Assisted.class);
+  public ImmutableSet<ClassName> annotationClassNames() {
+    return ImmutableSet.of(TypeNames.ASSISTED);
   }
 
   @Override
-  protected void process(
-      VariableElement assisted, ImmutableSet<Class<? extends Annotation>> annotations) {
+  protected void process(VariableElement assisted, ImmutableSet<ClassName> annotations) {
     new AssistedValidator().validate(assisted).printMessagesTo(messager);
   }
 

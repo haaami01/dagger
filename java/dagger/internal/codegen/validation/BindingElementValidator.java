@@ -32,19 +32,15 @@ import static javax.lang.model.type.TypeKind.VOID;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.FormatMethod;
-import dagger.MapKey;
-import dagger.Provides;
+import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.base.MultibindingAnnotations;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.InjectionAnnotations;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.model.Key;
 import dagger.model.Scope;
-import dagger.multibindings.ElementsIntoSet;
-import dagger.multibindings.IntoMap;
-import dagger.producers.Produces;
-import java.lang.annotation.Annotation;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +55,7 @@ import javax.lang.model.type.TypeMirror;
 
 /** A validator for elements that represent binding declarations. */
 public abstract class BindingElementValidator<E extends Element> {
-  private final Class<? extends Annotation> bindingAnnotation;
+  private final ClassName bindingAnnotation;
   private final AllowsMultibindings allowsMultibindings;
   private final AllowsScoping allowsScoping;
   private final Map<E, ValidationReport<E>> cache = new HashMap<>();
@@ -71,7 +67,7 @@ public abstract class BindingElementValidator<E extends Element> {
    * @param bindingAnnotation the annotation on an element that identifies it as a binding element
    */
   protected BindingElementValidator(
-      Class<? extends Annotation> bindingAnnotation,
+      ClassName bindingAnnotation,
       AllowsMultibindings allowsMultibindings,
       AllowsScoping allowsScoping,
       InjectionAnnotations injectionAnnotations) {
@@ -118,7 +114,7 @@ public abstract class BindingElementValidator<E extends Element> {
 
   /**
    * The error message when a the type for a binding element with {@link
-   * ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is a not set type.
+   * dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is a not set type.
    */
   protected String elementsIntoSetNotASetMessage() {
     return bindingElements(
@@ -127,7 +123,7 @@ public abstract class BindingElementValidator<E extends Element> {
 
   /**
    * The error message when a the type for a binding element with {@link
-   * ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is a raw set.
+   * dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is a raw set.
    */
   protected String elementsIntoSetRawSetMessage() {
     return bindingElements(
@@ -180,8 +176,8 @@ public abstract class BindingElementValidator<E extends Element> {
      * <p>If the binding is not a multibinding contribution, adds an error if the type is a
      * framework type.
      *
-     * <p>If the element has {@link ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES}, adds an
-     * error if the type is not a {@code Set<T>} for some {@code T}
+     * <p>If the element has {@link dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code
+     * SET_VALUES}, adds an error if the type is not a {@code Set<T>} for some {@code T}
      */
     protected void checkType() {
       switch (ContributionType.fromBindingElement(element)) {
@@ -238,8 +234,9 @@ public abstract class BindingElementValidator<E extends Element> {
     }
 
     /**
-     * Adds an error if the type for an element with {@link ElementsIntoSet @ElementsIntoSet} or
-     * {@code SET_VALUES} is not a a {@code Set<T>} for a reasonable {@code T}.
+     * Adds an error if the type for an element with {@link
+     * dagger.multibindings.ElementsIntoSet @ElementsIntoSet} or {@code SET_VALUES} is not a a
+     * {@code Set<T>} for a reasonable {@code T}.
      */
     // TODO(gak): should we allow "covariant return" for set values?
     protected void checkSetValuesType() {
@@ -275,8 +272,9 @@ public abstract class BindingElementValidator<E extends Element> {
     }
 
     /**
-     * Adds an error if an {@link IntoMap @IntoMap} element doesn't have exactly one {@link
-     * MapKey @MapKey} annotation, or if an element that is {@link IntoMap @IntoMap} has any.
+     * Adds an error if an {@link dagger.multibindings.IntoMap @IntoMap} element doesn't have
+     * exactly one {@link dagger.MapKey @MapKey} annotation, or if an element that is {@link
+     * dagger.multibindings.IntoMap @IntoMap} has any.
      */
     private void checkMapKeys() {
       if (!allowsMultibindings.allowsMultibindings()) {
@@ -306,8 +304,8 @@ public abstract class BindingElementValidator<E extends Element> {
      *   <li>the element doesn't allow {@linkplain MultibindingAnnotations multibinding annotations}
      *       and has any
      *   <li>the element does allow them but has more than one
-     *   <li>the element has a multibinding annotation and its {@link Provides} or {@link Produces}
-     *       annotation has a {@code type} parameter.
+     *   <li>the element has a multibinding annotation and its {@link dagger.Provides} or {@link
+     *       dagger.producers.Produces} annotation has a {@code type} parameter.
      * </ul>
      */
     private void checkMultibindings() {
@@ -337,7 +335,7 @@ public abstract class BindingElementValidator<E extends Element> {
       }
 
       // TODO(ronshapiro): move this into ProvidesMethodValidator
-      if (bindingAnnotation.equals(Provides.class)) {
+      if (bindingAnnotation.equals(TypeNames.PROVIDES)) {
         AnnotationMirror bindingAnnotationMirror =
             getAnnotationMirror(element, bindingAnnotation).get();
         boolean usesProvidesType = false;
