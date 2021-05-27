@@ -45,10 +45,10 @@ java_library(
         "//java/dagger/internal/guava:concurrent",
         "//java/dagger/producers",
         "//java/dagger/spi",
+        "@google_bazel_common//third_party/java/auto:common",
         "@google_bazel_common//third_party/java/auto:value",
         "@google_bazel_common//third_party/java/javapoet",
         "@google_bazel_common//third_party/java/jsr330_inject",
-        "@maven//:com_google_auto_auto_common",
     ],
 )
 
@@ -61,6 +61,6 @@ java_library(
         "//java/dagger/internal/codegen/extension",
         "//java/dagger/internal/guava:base",
         "//java/dagger/internal/guava:collect",
-        "@maven//:com_google_auto_auto_common",
+        "@google_bazel_common//third_party/java/auto:common",
     ],
 )
